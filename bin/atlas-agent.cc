@@ -78,7 +78,7 @@ static void gather_peak_titus_metrics(CGroup* cGroup) {
 
 static void gather_slow_titus_metrics(CGroup* cGroup, Proc* proc, Disk* disk, Aws* aws) {
   static bool is_cgroup2 = is_cgroup_version2();
-  Logger()->info("Gathering titus metrics");
+  Logger()->debug("Gathering titus metrics");
   aws->update_stats();
   cGroup->cpu_stats(is_cgroup2);
   if (is_cgroup2) {
@@ -99,7 +99,7 @@ static void gather_scaling_metrics(CpuFreq* cpufreq) { cpufreq->Stats(); }
 
 static void gather_slow_system_metrics(Proc* proc, Disk* disk, Ethtool* ethtool, Ntp* ntp,
                                        PressureStall* pressureStall, Aws* aws) {
-  Logger()->info("Gathering system metrics");
+  Logger()->debug("Gathering system metrics");
   aws->update_stats();
   disk->disk_stats();
   ethtool->update_stats();
@@ -348,8 +348,10 @@ int main(int argc, char* const argv[]) {
   spectator::Registry spectator_registry{cfg, spectator_logger};
   TaggingRegistry registry{&spectator_registry, maybe_tagger.value_or(atlasagent::Tagger::Nop())};
 #if defined(TITUS_SYSTEM_SERVICE)
+  Logger()->info("Start gathering Titus metrics");
   collect_titus_metrics(&registry, std::move(nvidia_lib), std::move(options.network_tags));
 #else
+  Logger()->info("Start gathering system metrics");
   collect_system_metrics(&registry, std::move(nvidia_lib), std::move(options.network_tags));
 #endif
   logger->info("Shutting down spectator registry");

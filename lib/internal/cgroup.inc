@@ -140,15 +140,19 @@ void CGroup<Reg>::cpu_utilization_v2(absl::Time now) noexcept {
   auto delta_t = absl::ToDoubleSeconds(now - last_updated);
   last_updated = now;
 
+  Logger()->info("parse {}/cpu.max file", path_prefix_);
   static auto num_procs = registry_->GetGauge("sys.cpu.numProcessors");
   auto vec = read_num_vector_from_file(path_prefix_, "cpu.max");
   auto cfs_quota = vec[0];
   auto cfs_period = vec[1];
   auto avail_cpu_time = (delta_t / cfs_period) * cfs_quota;
   num_procs->Set(cfs_quota / cfs_period);
+  Logger()->info("vec={} delta_t={} cfs_quota={} cfs_period={} avail_cpu_time={}", vec, delta_t, cfs_quota, cfs_period, avail_cpu_time);
 
+  Logger()->info("parse {}/cpu.stat file", path_prefix_);
   std::unordered_map<std::string, int64_t> stats;
   parse_kv_from_file(path_prefix_, "cpu.stat", &stats);
+  Logger()->info("stats={}", stats);
 
   static auto cpu_system = registry_->GetGauge("sys.cpu.utilization", {{"id", "system"}});
   static auto prev_system_time = static_cast<int64_t>(-1);
@@ -157,6 +161,7 @@ void CGroup<Reg>::cpu_utilization_v2(absl::Time now) noexcept {
     cpu_system->Set((secs / avail_cpu_time) * 100);
   }
   prev_system_time = stats["system_usec"];
+  Logger()->info("stats[system_usec]={} prev_system_time={}", stats["system_usec"], prev_system_time);
 
   static auto cpu_user = registry_->GetGauge("sys.cpu.utilization", {{"id", "user"}});
   static auto prev_user_time = static_cast<int64_t>(-1);
@@ -165,6 +170,7 @@ void CGroup<Reg>::cpu_utilization_v2(absl::Time now) noexcept {
     cpu_user->Set((secs / avail_cpu_time) * 100);
   }
   prev_user_time = stats["user_usec"];
+  Logger()->info("stats[user_usec]={} prev_system_time={}", stats["user_usec"], prev_user_time);
 }
 
 template <typename Reg>
