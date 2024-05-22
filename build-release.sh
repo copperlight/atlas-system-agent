@@ -2,19 +2,13 @@
 
 set -ex
 
-# switch to the open source atlas-system-agent directory, removed and synced by fetch-source.sh
-pushd src || exit 1
-
-# conan uses $HOME/.conan by default for cache; use newt storage instead
-export CONAN_USER_HOME=/storage
-
 BUILD_DIR=cmake-build
 
 export CC=gcc-11
 export CXX=g++-11
 
 echo "==== configure default profile ===="
-rm -f $CONAN_USER_HOME/.conan/profiles/default
+rm -f $HOME/.conan/profiles/default
 conan profile new default --detect
 conan profile update settings.compiler.libcxx=libstdc++11 default
 
