@@ -13,7 +13,7 @@ conan profile new default --detect
 conan profile update settings.compiler.libcxx=libstdc++11 default
 
 echo "==== install required dependencies ===="
-conan install . --build --install-folder $BUILD_DIR --profile ../scripts/no-omit-frame-pointer
+conan install . --build --install-folder $BUILD_DIR --profile no-omit-frame-pointer
 
 echo "==== install source dependencies ===="
 conan source .
