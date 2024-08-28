@@ -539,6 +539,8 @@ struct stat_vals {
     } else {
       vals.user = vals.system = vals.stolen = vals.nice = vals.wait = vals.interrupt = 0.0;
     }
+    Logger()->info("delta_total={} user={} system={} stolen={} nice={} wait={} interrupt={}",
+                   delta_total, vals.user, vals.system, vals.stolen, vals.nice, vals.wait, vals.interrupt);
     return vals;
   }
 };
@@ -685,7 +687,6 @@ void Proc<Reg>::cpu_stats() noexcept {
     if (it != prev_cpu_vals.end()) {
       auto& prev = it->second;
       auto computed_vals = per_cpu_vals.compute_vals(prev);
-      Logger()->info("sys.cpu.coreUtilization computed_vals={}", computed_vals);
       coresDistSummary.update(computed_vals);
     }
     prev_cpu_vals[cpu_num] = per_cpu_vals;
