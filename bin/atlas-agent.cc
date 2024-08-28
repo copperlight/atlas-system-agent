@@ -20,6 +20,7 @@
 #include <condition_variable>
 #include <csignal>
 #include <getopt.h>
+#include <fmt/chrono.h>
 
 using atlasagent::GetLogger;
 using atlasagent::Logger;
@@ -75,7 +76,8 @@ static void gather_scaling_metrics(CpuFreq* cpufreq) { cpufreq->Stats(); }
 
 static void gather_slow_system_metrics(Proc* proc, Disk* disk, Ethtool* ethtool, Ntp* ntp,
                                        PressureStall* pressureStall, Aws* aws) {
-  Logger()->debug("Gather EC2 system metrics");
+  auto start = std::chrono::system_clock::now();
+  Logger()->debug("Gather EC2 system metrics (start={})", start);
   aws->update_stats();
   disk->disk_stats();
   ethtool->update_stats();
@@ -92,6 +94,8 @@ static void gather_slow_system_metrics(Proc* proc, Disk* disk, Ethtool* ethtool,
   proc->socket_stats();
   proc->uptime_stats();
   proc->vmstats();
+  auto end = std::chrono::system_clock::now();
+  Logger()->debug("Gather EC2 system metrics (end={} elapsed={})", end, end - start);
 }
 #endif
 
@@ -224,6 +228,7 @@ void collect_system_metrics(TaggingRegistry* registry, std::unique_ptr<atlasagen
     }
     next_run += seconds(1);
     time_to_sleep = next_run - system_clock::now();
+    Logger()->debug("next_run={} next_slow_run={} time_to_sleep={}", next_run, next_slow_run, time_to_sleep);
   } while (runner.wait_for(time_to_sleep));
 }
 #endif
