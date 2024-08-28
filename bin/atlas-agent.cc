@@ -95,8 +95,8 @@ static void gather_slow_system_metrics(Proc* proc, Disk* disk, Ethtool* ethtool,
   proc->uptime_stats();
   proc->vmstats();
   auto end = std::chrono::system_clock::now();
-  auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(end - start);
-  Logger()->debug("Gather EC2 system metrics (end={} elapsed={})", end, elapsed);
+  auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+  Logger()->debug("Gather EC2 system metrics (end={} elapsed={}ms)", end, elapsed);
 }
 #endif
 
