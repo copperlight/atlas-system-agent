@@ -685,6 +685,7 @@ void Proc<Reg>::cpu_stats() noexcept {
     if (it != prev_cpu_vals.end()) {
       auto& prev = it->second;
       auto computed_vals = per_cpu_vals.compute_vals(prev);
+      Logger()->info("sys.cpu.coreUtilization computed_vals={}", computed_vals);
       coresDistSummary.update(computed_vals);
     }
     prev_cpu_vals[cpu_num] = per_cpu_vals;
