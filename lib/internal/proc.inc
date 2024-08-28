@@ -519,7 +519,7 @@ struct stat_vals {
 
   stat_vals() = default;
 
-  cpu_gauge_vals compute_vals(const stat_vals& prev) const noexcept {
+  cpu_gauge_vals compute_vals(const stat_vals& prev, bool sysCoreUtil) const noexcept {
     cpu_gauge_vals vals{};
     auto delta_total = total - prev.total;
     auto delta_user = user - prev.user;
@@ -539,8 +539,10 @@ struct stat_vals {
     } else {
       vals.user = vals.system = vals.stolen = vals.nice = vals.wait = vals.interrupt = 0.0;
     }
-    Logger()->info("delta_total={} user={} system={} stolen={} nice={} wait={} interrupt={}",
-                   delta_total, vals.user, vals.system, vals.stolen, vals.nice, vals.wait, vals.interrupt);
+    if (sysCoreUtil) {
+      Logger()->info("delta_total={} user={} system={} stolen={} nice={} wait={} interrupt={}",
+                     delta_total, vals.user, vals.system, vals.stolen, vals.nice, vals.wait, vals.interrupt);
+    }
     return vals;
   }
 };
@@ -636,7 +638,7 @@ void Proc<Reg>::peak_cpu_stats() noexcept {
   }
   detail::stat_vals vals = detail::stat_vals::parse(line + 3);  // 'cpu'
   if (prev.has_been_updated()) {
-    auto gauge_vals = vals.compute_vals(prev);
+    auto gauge_vals = vals.compute_vals(prev, false);
     peakUtilizationGauges.update(gauge_vals);
   }
   prev = vals;
@@ -664,7 +666,7 @@ void Proc<Reg>::cpu_stats() noexcept {
   }
   detail::stat_vals vals = detail::stat_vals::parse(line + 3);  // 'cpu'
   if (prev_vals.has_been_updated()) {
-    auto gauge_vals = vals.compute_vals(prev_vals);
+    auto gauge_vals = vals.compute_vals(prev_vals, false);
     utilizationGauges.update(gauge_vals);
   }
   prev_vals = vals;
@@ -686,7 +688,7 @@ void Proc<Reg>::cpu_stats() noexcept {
     auto it = prev_cpu_vals.find(cpu_num);
     if (it != prev_cpu_vals.end()) {
       auto& prev = it->second;
-      auto computed_vals = per_cpu_vals.compute_vals(prev);
+      auto computed_vals = per_cpu_vals.compute_vals(prev, true);
       coresDistSummary.update(computed_vals);
     }
     prev_cpu_vals[cpu_num] = per_cpu_vals;
