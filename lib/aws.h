@@ -81,7 +81,7 @@ class Aws {
       if (resp.status == 200) {
         // save the resulting URL now that we know the instance profile
         creds_url_ = fmt::format("{}{}", iam_endpoint_, resp.raw_body);
-        logger->info("Using {} as the credentials URL", creds_url_);
+        logger->debug("Using {} as the credentials URL", creds_url_);
       } else {
         return;
       }
