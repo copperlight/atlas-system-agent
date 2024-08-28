@@ -77,7 +77,7 @@ static void gather_scaling_metrics(CpuFreq* cpufreq) { cpufreq->Stats(); }
 static void gather_slow_system_metrics(Proc* proc, Disk* disk, Ethtool* ethtool, Ntp* ntp,
                                        PressureStall* pressureStall, Aws* aws) {
   auto start = std::chrono::system_clock::now();
-  Logger()->debug("Gather EC2 system metrics (start={})", start);
+  Logger()->info("Gather EC2 system metrics (start={})", start);
   aws->update_stats();
   disk->disk_stats();
   ethtool->update_stats();
@@ -96,7 +96,7 @@ static void gather_slow_system_metrics(Proc* proc, Disk* disk, Ethtool* ethtool,
   proc->vmstats();
   auto end = std::chrono::system_clock::now();
   auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-  Logger()->debug("Gather EC2 system metrics (end={} elapsed={})", end, elapsed);
+  Logger()->info("Gather EC2 system metrics (end={} elapsed={})", end, elapsed);
 }
 #endif
 
@@ -226,7 +226,7 @@ void collect_system_metrics(TaggingRegistry* registry, std::unique_ptr<atlasagen
         gpu->gpu_metrics();
       }
       next_slow_run += seconds(60);
-      Logger()->debug("next_slow_run={}", next_slow_run);
+      Logger()->info("next_slow_run={}", next_slow_run);
     }
     next_run += seconds(1);
     time_to_sleep = next_run - system_clock::now();
